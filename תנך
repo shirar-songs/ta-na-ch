@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לומדים את התנ"ך ביחד</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* כותרת ולוגו */
+        .header-container {
+            margin-bottom: 35px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+        }
+        .logo {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 36px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+        }
+
+        /* שלושת המלבנים הראשיים (תכלת-טורקיז) */
+        .main-categories {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            background-color: #17a2b8; /* תכלת טורקיז */
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .category-btn:hover { background-color: #138496; }
+
+        /* אזור הספרים (ירוק בהיר) */
+        .books-container {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .book-btn {
+            background-color: #a3e4d7; /* ירוק בהיר */
+            color: #2c3e50;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .book-btn:hover:not(.taken) { transform: scale(1.05); }
+
+        /* אזור הפרקים (חום-בורדו כהה) */
+        .chapters-section {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .chapters-section h3 { margin-top: 0; color: #5d4037; }
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 10px;
+        }
+        .chapter-btn {
+            background-color: #8d6e63; /* חום בורדו כהה */
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .chapter-btn:hover:not(.taken) { background-color: #795548; }
+        
+        /* פריט שנתפס (אפור בהיר) */
+        .chapter-btn.taken, .book-btn.taken {
+            background-color: #e0e0e0 !important;
+            color: #9e9e9e !important;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* --- חלונית קופצת מובנית (Modal) --- */
+        .custom-modal-overlay {
+            display: none; /* מוסתר כברירת מחדל */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* רקע חצי שקוף מאחור */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .custom-modal {
+            background-color: #fffdd0; /* צבע שמנת */
+            border: 3px solid #17a2b8; /* מסגרת טורקיז */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        .custom-modal h2 {
+            color: #117a8b; /* טקסט טורקיז */
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        .modal-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        .modal-btn.confirm {
+            background-color: #17a2b8; /* טורקיז לכפתור כן */
+            color: white;
+        }
+        .modal-btn.confirm:hover { background-color: #138496; }
+        
+        .modal-btn.cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .modal-btn.cancel:hover { background-color: #d5d5d5; }
+    </style>
+</head>
+<body>
+
+    <!-- כותרת ולוגו -->
+    <div class="header-container">
+        <div class="logo">📖</div>
+        <h1>לומדים את התנ"ך ביחד</h1>
+        <p class="subtitle">לעילוי נשמת אהובנו הגיבור מעוז ישראל רקנטי הי"ד</p>
+    </div>
+
+    <!-- שלושת המלבנים הראשיים -->
+    <div class="main-categories">
+        <button class="category-btn" onclick="showBooks('tora')">פרקים בתורה</button>
+        <button class="category-btn" onclick="showBooks('neviim')">פרקים בנביאים</button>
+        <button class="category-btn" onclick="showBooks('ktuvim')">פרקים בכתובים</button>
+    </div>
+
+    <!-- אזור הספרים -->
+    <div id="booksContainer" class="books-container"></div>
+
+    <!-- אזור הפרקים -->
+    <div id="chaptersSection" class="chapters-section">
+        <h3 id="currentBookTitle">בחר ספר כדי לראות פרקים</h3>
+        <div id="chaptersGrid" class="chapters-grid"></div>
+    </div>
+
+    <!-- חלונית קופצת מעוצבת באתר -->
+    <div id="customModalOverlay" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h2 id="modalText">האם אתה רוצה להשתבץ לפרק?</h2>
+            <div class="modal-buttons">
+                <button id="modalConfirmBtn" class="modal-btn confirm">כן</button>
+                <button id="modalCancelBtn" class="modal-btn cancel">לא, אני אחפש פרק אחר</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // בסיס הנתונים של הספרים ומספר הפרקים שלהם
+        const db = {
+            tora: [
+                { name: "בראשית", ch: 50 }, { name: "שמות", ch: 40 }, { name: "ויקרא", ch: 27 },
+                { name: "במדבר", ch: 36 }, { name: "דברים", ch: 34 }
+            ],
+            neviim: [
+                { name: "יהושע", ch: 24 }, { name: "שופטים", ch: 21 }, { name: "שמואל א'", ch: 31 },
+                { name: "שמואל ב'", ch: 24 }, { name: "מלכים א'", ch: 22 }, { name: "מלכים ב'", ch: 25 },
+                { name: "ישעיהו", ch: 66 }, { name: "ירמיהו", ch: 52 }, { name: "יחזקאל", ch: 48 },
+                { name: "הושע", ch: 14 }, { name: "יואל", ch: 4 }, { name: "עמוס", ch: 9 },
+                { name: "עובדיה", ch: 1 }, { name: "יונה", ch: 4 }, { name: "מיכה", ch: 7 },
+                { name: "נחום", ch: 3 }, { name: "חבקוק", ch: 3 }, { name: "צפניה", ch: 3 },
+                { name: "חגי", ch: 2 }, { name: "זכריה", ch: 14 }, { name: "מלאכי", ch: 3 }
+            ],
+            ktuvim: [
+                { name: "תהילים", ch: 150 }, { name: "משלי", ch: 31 }, { name: "איוב", ch: 42 },
+                { name: "שיר השירים", ch: 8 }, { name: "רות", ch: 4 }, { name: "איכה", ch: 5 },
+                { name: "קהלת", ch: 12 }, { name: "אסתר", ch: 10 }, { name: "דניאל", ch: 12 },
+                { name: "עזרא", ch: 10 }, { name: "נחמיה", ch: 13 }, { name: "דברי הימים א'", ch: 29 },
+                { name: "דברי הימים ב'", ch: 36 }
+            ]
+        };
+
+        function numToHeb(num) {
+            const letters = ["", "א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "יא", "יב", "יג", "יד", "טו", "טז", "יז", "יח", "יט", "כ", "כא", "כב", "כג", "כד", "כה", "כו", "כז", "כח", "כט", "ל", "לא", "לב", "לג", "לד", "לה", "לו", "לז", "לח", "לט", "מ", "מא", "מב", "מג", "מד", "מה", "מו", "מז", "מח", "מט", "נ", "נא", "נב", "נג", "נד", "נה", "נו", "נז", "נח", "נט", "ס", "סא", "סב", "סג", "סד", "סה", "סו", "סז", "סח", "סט", "ע", "עא", "עב", "עג", "עד", "עה", "עו", "עז", "עח", "עט", "פ", "פא", "פב", "פג", "פד", "פה", "פו", "פז", "פח", "פט", "צ", "צא", "צב", "צג", "צד", "צה", "צו", "צח", "צט", "ק", "קא", "קב", "קג", "קד", "קה", "קו", "קז", "קח", "קט", "קי", "קיא", "קיב", "קיג", "קיד", "קטו", "קטז", "קיז", "קיח", "קיט", "קכ", "קכא", "קכב", "קכג", "קכד", "קכה", "קכו", "קכז", "קכח", "קכט", "קל", "קלא", "קלב", "קלג", "קלד", "קלה", "קלו", "קלז", "קלח", "קלט", "קמ", "קמא", "קמב", "קמג", "קמד", "קמה", "קמו", "קמז", "קמח", "קמט", "קנ"];
+            return letters[num] || num;
+        }
+
+        let takenChapters = {};
+        
+        // משתנים לשמירת הפרק שנלחץ כרגע כדי להשתמש בו באישור של החלונית
+        let activeChapterBtn = null;
+        let activeChapterKey = "";
+        let activeBookName = "";
+        let activeTotalChapters = 0;
+
+        function showBooks(category) {
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '';
+            document.getElementById('chaptersSection').style.display = 'none';
+            
+            db[category].forEach(book => {
+                const btn = document.createElement('button');
+                btn.className = 'book-btn';
+                btn.id = `book-btn-${book.name}`;
+                btn.innerText = book.name;
+                
+                if (checkIfBookIsFinished(book.name, book.ch)) {
+                    btn.classList.add('taken');
+                }
+                
+                btn.onclick = () => showChapters(book.name, book.ch, category);
+                container.appendChild(btn);
+            });
+            
+            container.style.display = 'grid';
+        }
+
+        function showChapters(bookName, totalChapters, category) {
+            const section = document.getElementById('chaptersSection');
+            const grid = document.getElementById('chaptersGrid');
+            document.getElementById('currentBookTitle').innerText = 'פרקים בספר ' + bookName;
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= totalChapters; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'chapter-btn';
+                const hebLetter = numToHeb(i);
+                btn.innerText = hebLetter;
+                
+                const chapterKey = `${bookName}-${i}`;
+                
+                if (takenChapters[chapterKey]) {
+                    btn.classList.add('taken');
+                }
+
+                btn.onclick = () => {
+                    if (btn.classList.contains('taken')) return;
+                    
+                    // שמירת נתוני הכפתור שנלחץ
+                    activeChapterBtn = btn;
+                    activeChapterKey = chapterKey;
+                    activeBookName = bookName;
+                    activeTotalChapters = totalChapters;
+                    
+                    // פתיחת החלונית המעוצבת במקום ה-confirm הישן
+                    openCustomModal(`האם אתה רוצה להשתבץ לפרק ${hebLetter} בספר ${bookName}?`);
+                };
+                
+                grid.appendChild(btn);
+            }
+            
+            section.style.display = 'block';
+        }
+
+        // פונקציות החלונית המעוצבת
+        function openCustomModal(text) {
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('customModalOverlay').style.display = 'flex';
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModalOverlay').style.display = 'none';
+            activeChapterBtn = null;
+        }
+
+        // הגדרת הפעולות לכפתורי החלונית
+        document.getElementById('modalConfirmBtn').onclick = () => {
+            if (activeChapterBtn) {
+                activeChapterBtn.classList.add('taken');
+                takenChapters[activeChapterKey] = true;
+                updateBookStatus(activeBookName, activeTotalChapters);
+            }
+            closeCustomModal();
+        };
+
+        document.getElementById('modalCancelBtn').onclick = () => {
+            closeCustomModal();
+        };
+
+        function updateBookStatus(bookName, totalChapters) {
+            let takenInBook = 0;
+            for (let i = 1; i <= totalChapters; i++) {
+                if (takenChapters[`${bookName}-${i}`]) {
+                    takenInBook++;
+                }
+            }
+
+            if (takenInBook === totalChapters) {
+                const bookBtn = document.getElementById(`book-btn-${bookName}`);
+                if (bookBtn) {
+                    bookBtn.classList.add('taken');
+                }
+            }
+        }
+
+        function checkIfBookIsFinished(bookName, totalChapters) {
+            let takenInBook = 0;
+            for (let i = 1; i <= totalChapters; i++) {
+                if (takenChapters[`${bookName}-${i}`]) {
+                    takenInBook++;
+                }
+            }
+            return (takenInBook === totalChapters && totalChapters > 0);
+        }
+    </script>
+</body>
+</html>
